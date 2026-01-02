@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Simple Car Game</title>
+<style>
+    body {
+        background: #222;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        font-family: Arial;
+    }
+
+    #game {
+        position: relative;
+        width: 300px;
+        height: 500px;
+        background: #555;
+        overflow: hidden;
+        border: 4px solid white;
+    }
+
+    .road-line {
+        position: absolute;
+        width: 10px;
+        height: 60px;
+        background: white;
+        left: 145px;
+    }
+
+    #player {
+        position: absolute;
+        width: 50px;
+        height: 80px;
+        background: red;
+        bottom: 20px;
+        left: 125px;
+        border-radius: 5px;
+    }
+
+    .enemy {
+        position: absolute;
+        width: 50px;
+        height: 80px;
+        background: yellow;
+        top: -100px;
+        border-radius: 5px;
+    }
+
+    #score {
+        color: white;
+        position: absolute;
+        top: -40px;
+        font-size: 20px;
+    }
+</style>
+</head>
+
+<body>
+
+<div>
+    <div id="score">Score: 0</div>
+    <div id="game">
+        <div id="player"></div>
+    </div>
+</div>
+
+<script>
+    const game = document.getElementById("game");
+    const player = document.getElementById("player");
+    const scoreDisplay = document.getElementById("score");
+
+    let score = 0;
+    let speed = 5;
+    let gameOver = false;
+
+    document.addEventListener("keydown", movePlayer);
+
+    function movePlayer(e) {
+        let left = parseInt(window.getComputedStyle(player).getPropertyValue("left"));
+        if (e.key === "ArrowLeft" && left > 0) {
+            player.style.left = left - 20 + "px";
+        }
+        if (e.key === "ArrowRight" && left < 250) {
+            player.style.left = left + 20 + "px";
+        }
+    }
+
+    function createEnemy() {
+        let enemy = document.createElement("div");
+        enemy.classList.add("enemy");
+        enemy.style.left = Math.floor(Math.random() * 250) + "px";
+        game.appendChild(enemy);
+
+        let enemyInterval = setInterval(() => {
+            if (gameOver) {
+                clearInterval(enemyInterval);
+                return;
+            }
+
+            let enemyTop = parseInt(window.getComputedStyle(enemy).getPropertyValue("top"));
+            enemy.style.top = enemyTop + speed + "px";
+
+            // Collision detection
+            let playerRect = player.getBoundingClientRect();
+            let enemyRect = enemy.getBoundingClientRect();
+
+            if (
+                playerRect.left < enemyRect.right &&
+                playerRect.right > enemyRect.left &&
+                playerRect.top < enemyRect.bottom &&
+                playerRect.bottom > enemyRect.top
+            ) {
+                gameOver = true;
+                alert("Game Over! Score: " + score);
+                location.reload();
+            }
+
+            if (enemyTop > 500) {
+                enemy.remove();
+                score++;
+                scoreDisplay.innerText = "Score: " + score;
+                clearInterval(enemyInterval);
+            }
+        }, 20);
+    }
+
+    setInterval(() => {
+        if (!gameOver) {
+            createEnemy();
+        }
+    }, 1500);
+</script>
+
+</body>
+</html>
